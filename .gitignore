@@ -126,3 +126,9 @@ report.csv
 
 # repositories
 repositories/*
+
+# pmd report
+pmd-report.csv
+
+# result report
+result.csv

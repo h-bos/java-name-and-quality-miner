@@ -5,7 +5,13 @@ import java.util.List;
 
 public class CompilationUnitRecord
 {
-    public static final String CSV_HEADER = "avg_class_or_interface_name_length,number_of_methods,method_casing_consistency,number_of_violations,log_violations,has_violation";
+    public static final String CSV_HEADER =
+            "avg_class_or_interface_name_length," +
+            "number_of_methods," +
+            "method_casing_consistency," +
+            "number_of_violations," +
+            "log_violations," +
+            "has_violation";
 
     // {repo-name}\...\file.java
     String compilationUnitId;
@@ -22,7 +28,12 @@ public class CompilationUnitRecord
 
     public String asCsvRow()
     {
-        return getAverageClassOrInterfaceNameLength() + "," + methodNames.size() + "," + methodNamingConsistency() + "," + numberOfViolations + "," + logViolation() + "," + hasViolation();
+        return getAverageClassOrInterfaceNameLength() + ","
+                + methodNames.size() + ","
+                + methodNamingConsistency() + ","
+                + numberOfViolations + ","
+                + logViolation() + ","
+                + hasViolation();
     }
 
     private int getAverageClassOrInterfaceNameLength()
@@ -77,16 +88,7 @@ public class CompilationUnitRecord
 
         int sum =  numberOfCamel + numberOfPascal + numberOfUnderline + numberOfHungarian + numberOfOther;
 
-        float consistency;
-
-        if (sum == 0)
-        {
-            consistency = 1.0f;
-        }
-        else
-        {
-            consistency = (float) max / sum;
-        }
+        float consistency = sum == 0 ? 1.0f : (float) max / sum;
 
         return consistency;
     }

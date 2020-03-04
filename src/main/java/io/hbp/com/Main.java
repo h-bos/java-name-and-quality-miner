@@ -9,7 +9,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,36 +19,26 @@ public class Main
 {
     public static void main(String[] args)
     {
-        Map<String, List<PmdRecord>> compilationUnitIdToPmdRecords = null;
-        try
-        {
-            compilationUnitIdToPmdRecords = findPmdRecords();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        Map<String, List<PmdRecord>> pmdRecords = findPmdRecords();
+        Map<String, CompilationUnitRecord> compilationUnits = findCompilationUnits();
 
-        Map<String, CompilationUnitRecord> compilationUnitIdToCompilationUnits = findCompilationUnits();
-
-        for (Map.Entry<String, List<PmdRecord>> record : compilationUnitIdToPmdRecords.entrySet())
+        for (Map.Entry<String, List<PmdRecord>> pmdRecord : pmdRecords.entrySet())
         {
-            int numberOfViolations = record.getValue().size();
-            if (compilationUnitIdToCompilationUnits.containsKey(record.getKey())) {
-                compilationUnitIdToCompilationUnits.get(record.getKey()).numberOfViolations += numberOfViolations;
+            int numberOfViolations = pmdRecord.getValue().size();
+            if (compilationUnits.containsKey(pmdRecord.getKey())) {
+                compilationUnits.get(pmdRecord.getKey()).numberOfViolations += numberOfViolations;
             }
         }
 
-        List<CompilationUnitRecord> finalRecords = new ArrayList<>();
-
-        for (Map.Entry<String, CompilationUnitRecord> record : compilationUnitIdToCompilationUnits.entrySet())
+        List<CompilationUnitRecord> resultingRecords = new ArrayList<>();
+        for (Map.Entry<String, CompilationUnitRecord> record : compilationUnits.entrySet())
         {
-            finalRecords.add(record.getValue());
+            resultingRecords.add(record.getValue());
         }
 
         List<String> lines = new ArrayList<>();
         lines.add(CompilationUnitRecord.CSV_HEADER);
-        lines.addAll(finalRecords.stream().map(record -> record.asCsvRow()).collect(Collectors.toList()));
+        lines.addAll(resultingRecords.stream().map(record -> record.asCsvRow()).collect(Collectors.toList()));
 
         Path file = Paths.get("result.csv");
         try
@@ -59,23 +48,31 @@ public class Main
         catch (IOException e)
         {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
-    private static Map<String, List<PmdRecord>> findPmdRecords() throws IOException
+    private static Map<String, List<PmdRecord>> findPmdRecords()
     {
-        // Put pmd records in a map { compilationUnitId -> [PmdRecord] }
         Map<String, List<PmdRecord>> compilationUnitIdToPmdRecords = new HashMap<>();
-        Files.lines(Paths.get(".", "pmd-report.csv")).skip(1).forEach(line -> {
-            PmdRecord pmdRecord = new PmdRecord(line);
-            if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
-                List<PmdRecord> initialPmdRecordList = new ArrayList<>();
-                initialPmdRecordList.add(pmdRecord);
-                compilationUnitIdToPmdRecords.put(pmdRecord.compilationUnitId, initialPmdRecordList);
-            } else {
-                compilationUnitIdToPmdRecords.get(pmdRecord.compilationUnitId).add(pmdRecord);
-            }
-        });
+        try
+        {
+            Files.lines(Paths.get(".", "pmd-report.csv")).skip(1).forEach(line -> {
+                PmdRecord pmdRecord = new PmdRecord(line);
+                if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
+                    List<PmdRecord> initialPmdRecordList = new ArrayList<>();
+                    initialPmdRecordList.add(pmdRecord);
+                    compilationUnitIdToPmdRecords.put(pmdRecord.compilationUnitId, initialPmdRecordList);
+                } else {
+                    compilationUnitIdToPmdRecords.get(pmdRecord.compilationUnitId).add(pmdRecord);
+                }
+            });
+        }
+        catch (IOException e)
+        {
+            System.out.println("[ERROR] No PMD records found.");
+            e.printStackTrace();
+        }
         return compilationUnitIdToPmdRecords;
     }
 
@@ -122,34 +119,24 @@ public class Main
             }
             catch (Throwable th)
             {
+                System.out.println("[WARNING] File could not be parsed: " + path.toString());
                 continue;
             }
             if (!parseResult.isSuccessful()) {
+                System.out.println("[WARNING] Parse result was not successful: " + path.toString());
                 continue;
             }
 
             Optional<CompilationUnit> compilationUnitOptional = parseResult.getResult();
 
             if (!compilationUnitOptional.isPresent()) {
+                System.out.println("[WARNING] Compilation unit is not present: " + path.toString());
                 continue;
             }
 
             CompilationUnit compilationUnit = compilationUnitOptional.get();
 
-            String compilationUnitId;
-
-            Optional<PackageDeclaration> packageDeclaration = compilationUnit.getPackageDeclaration();
-
-            if (packageDeclaration.isPresent())
-            {
-                compilationUnitId = packageDeclaration.get().getNameAsString() + "." + path.getFileName().toString();
-            }
-            else
-            {
-                compilationUnitId = path.getFileName().toString();
-            }
-
-            CompilationUnitRecord compilationUnitRecord = new CompilationUnitRecord(compilationUnitId);
+            CompilationUnitRecord compilationUnitRecord = new CompilationUnitRecord(findCompilationUnitId(compilationUnit, path));
             compilationUnitRecord.classOrInterfaceNames.addAll(
                     compilationUnit
                             .findAll(ClassOrInterfaceDeclaration.class)
@@ -168,5 +155,20 @@ public class Main
         }
 
         return compilationUnitRecords;
+    }
+
+    private static String findCompilationUnitId(CompilationUnit compilationUnit, Path path)
+    {
+        String compilationUnitId;
+        Optional<PackageDeclaration> packageDeclaration = compilationUnit.getPackageDeclaration();
+        if (packageDeclaration.isPresent())
+        {
+            compilationUnitId = packageDeclaration.get().getNameAsString() + "." + path.getFileName().toString();
+        }
+        else
+        {
+            compilationUnitId = path.getFileName().toString();
+        }
+        return compilationUnitId;
     }
 }

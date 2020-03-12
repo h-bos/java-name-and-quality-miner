@@ -1,6 +1,6 @@
 package io.hbp.com;
 
-public class PmdRecord
+class PmdRecord
 {
     // {package} + {className}
     // Ex. org.jboss.as.weld.deployment.processorsWeldDeploymentCleanupProcessor.java
@@ -9,13 +9,14 @@ public class PmdRecord
     String problem;
     String packageName;
     String file;
-    int priority; // Low value => high priority
+    // [1,5] low value => high priority
+    int priority;
     int lineNumber;
     String description;
     String ruleSet;
     String ruleId;
 
-    public PmdRecord(String csvLine)
+    PmdRecord(String csvLine)
     {
         // First we remove the leftmost and rightmost quotes from the line. After that, the rest of the line can be
         // split on ",". Ex line: "16","concurrentDS",{...},"LocalVariableCouldBeFinal"

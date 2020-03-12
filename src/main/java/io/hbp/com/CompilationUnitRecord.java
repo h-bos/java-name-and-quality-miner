@@ -3,103 +3,129 @@ package io.hbp.com;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompilationUnitRecord
+/*
+Independent variables:
+    * Avg length of: methods, classes, fields, parameters
+    * Casing consistency: methods, classes, fields, parameters
+    * Number of words: methods, classes, fields, parameters
+    * Number of numbers: methods, classes, fields, parameters
+    * Project LOC
+
+Dependent variables:
+    * Number of violations
+    * Number of violations in category X
+    * Average violation priority
+    TODO:
+    * WMC
+    * CBO
+    * DIT
+    * RFC
+    * LCOM
+*/
+
+class CompilationUnitRecord
 {
     public static final String CSV_HEADER =
-            "avg_class_or_interface_name_length," +
-            "number_of_methods," +
-            "method_casing_consistency," +
-            "number_of_violations," +
-            "log_violations," +
-            "has_violation";
+        "avg_length," +
+        "avg_length_class_or_interface," +
+        "avg_length_method," +
+        "avg_length_field," +
+        "avg_length_parameter," +
+
+        "avg_casing_consistency," +
+        "avg_casing_consistency_class_or_interface," +
+        "avg_casing_consistency_method," +
+        "avg_casing_consistency_field," +
+        "avg_casing_consistency_parameter," +
+
+        "avg_number_of_words," +
+        "avg_number_of_words_class_or_interface," +
+        "avg_number_of_words_method," +
+        "avg_number_of_words_field," +
+        "avg_number_of_words_parameter," +
+
+        "avg_number_of_numbers," +
+        "avg_number_of_numbers_class_or_interface," +
+        "avg_number_of_numbers_method," +
+        "avg_number_of_numbers_field," +
+        "avg_number_of_numbers_parameter," +
+
+        "project_loc," +
+        "number_of_violations," +
+
+        "number_of_best_practices_violations," +
+        "number_of_code_style_violations," +
+        "number_of_design_violations," +
+        "number_of_documentation_violations," +
+        "number_of_error_prone_violations," +
+        "number_of_multithreading_violations," +
+        "number_of_performance_violations," +
+        "number_of_security_violations," +
+
+        "avg_violation_priority";
 
     // {repo-name}\...\file.java
     String compilationUnitId;
 
+    // Dependent variables
     int numberOfViolations = 0;
 
-    List<String> classOrInterfaceNames = new ArrayList<>();
-    List<String> methodNames = new ArrayList<>();
+    // Independent variables
+    long projectLOC = 0L;
 
-    public CompilationUnitRecord(String compilationUnitId)
+    // Compilation unit properties that can be used to find independent variables
+    List<String> classOrInterfaceNames = new ArrayList<>();
+    List<String> methodNames           = new ArrayList<>();
+    List<String> fieldNames            = new ArrayList<>();
+    List<String> parameterNames        = new ArrayList<>();
+
+    // PMD violations
+    List<PmdRecord> pmdRecords = new ArrayList<>();
+
+    CompilationUnitRecord(String compilationUnitId)
     {
         this.compilationUnitId = compilationUnitId;
     }
 
     public String asCsvRow()
     {
-        return getAverageClassOrInterfaceNameLength() + ","
-                + methodNames.size() + ","
-                + methodNamingConsistency() + ","
-                + numberOfViolations + ","
-                + logViolation() + ","
-                + hasViolation();
-    }
+        return
+            IdentifierUtils.averageIdentifierLength(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
+            IdentifierUtils.averageIdentifierLength(classOrInterfaceNames) + "," +
+            IdentifierUtils.averageIdentifierLength(methodNames) + "," +
+            IdentifierUtils.averageIdentifierLength(fieldNames) + "," +
+            IdentifierUtils.averageIdentifierLength(parameterNames) + "," +
 
-    private int getAverageClassOrInterfaceNameLength()
-    {
-        if (classOrInterfaceNames.size() == 0) return 0;
-        return classOrInterfaceNames.stream().mapToInt(String::length).sum() / classOrInterfaceNames.size();
-    }
+            IdentifierUtils.casingConsistency(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
+            IdentifierUtils.casingConsistency(classOrInterfaceNames) + "," +
+            IdentifierUtils.casingConsistency(methodNames) + "," +
+            IdentifierUtils.casingConsistency(fieldNames) + "," +
+            IdentifierUtils.casingConsistency(parameterNames) + "," +
 
-    private float methodNamingConsistency()
-    {
-        int numberOfCamel = 0;
-        int numberOfPascal = 0;
-        int numberOfUnderline = 0;
-        int numberOfHungarian = 0;
-        int numberOfOther = 0;
+            IdentifierUtils.averageNumberOfWords(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
+            IdentifierUtils.averageNumberOfWords(classOrInterfaceNames) + "," +
+            IdentifierUtils.averageNumberOfWords(methodNames) + "," +
+            IdentifierUtils.averageNumberOfWords(fieldNames) + "," +
+            IdentifierUtils.averageNumberOfWords(parameterNames) + "," +
 
-        for (String methodName : methodNames)
-        {
-            // Camel case
-            if (methodName.matches("\\b(([a-z]+([A-Z][a-z]*)+)|[a-z]{2,})\\d*\\b"))
-            {
-                numberOfCamel++;
-            }
-            // Pascal
-            else if (methodName.matches("\\b([A-Z][a-z]+)+\\d*\\b"))
-            {
-                numberOfPascal++;
-            }
-            // Underline
-            else if (methodName.matches("\\b(([a-z]+(\\d*)+_)+([a-z]*\\d*)+)\\b"))
-            {
-                numberOfUnderline++;
-            }
-            // Hungarian
-            else if (methodName.matches("\\b([gmcs]_)?(p|fn|v|h|l|b|f|dw|sz|n|d|c|ch|i|by|w|r|u)(Max|Min|Init|T|Src|Dest)?([A-Z][a-z]+)+\\d*\\b"))
-            {
-                numberOfHungarian++;
-            }
-            else
-            {
-                numberOfOther++;
-            }
+            IdentifierUtils.averageNumberOfNumbers(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
+            IdentifierUtils.averageNumberOfNumbers(classOrInterfaceNames) + "," +
+            IdentifierUtils.averageNumberOfNumbers(methodNames) + "," +
+            IdentifierUtils.averageNumberOfNumbers(fieldNames) + "," +
+            IdentifierUtils.averageNumberOfNumbers(parameterNames) + "," +
 
-        }
+            projectLOC + "," +
+            numberOfViolations + "," +
 
-        int max =
-                Integer.max(numberOfCamel,
-                        Integer.max(numberOfPascal,
-                                Integer.max(numberOfUnderline,
-                                        Integer.max(numberOfHungarian, numberOfOther))));
+            ViolationsUtils.numberOfViolations(pmdRecords, "Best Practices") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Code Style") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Design") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Documentation") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Error Prone") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Multithreading") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Performance") + "," +
+            ViolationsUtils.numberOfViolations(pmdRecords, "Security") + "," +
 
-
-        int sum =  numberOfCamel + numberOfPascal + numberOfUnderline + numberOfHungarian + numberOfOther;
-
-        float consistency = sum == 0 ? 1.0f : (float) max / sum;
-
-        return consistency;
-    }
-
-    private int hasViolation()
-    {
-        return numberOfViolations == 0 ? 0 : 1;
-    }
-
-    private double logViolation()
-    {
-        return (numberOfViolations == 0) ? numberOfViolations : Math.log(numberOfViolations);
+            ViolationsUtils.averagePriority(pmdRecords);
     }
 }

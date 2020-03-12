@@ -4,11 +4,14 @@ import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,25 +25,27 @@ public class Main
         Map<String, List<PmdRecord>> pmdRecords = findPmdRecords();
         Map<String, CompilationUnitRecord> compilationUnits = findCompilationUnits();
 
+        // Add PMD violations to the compilation units that have them.
         for (Map.Entry<String, List<PmdRecord>> pmdRecord : pmdRecords.entrySet())
         {
-            int numberOfViolations = pmdRecord.getValue().size();
-            if (compilationUnits.containsKey(pmdRecord.getKey())) {
-                compilationUnits.get(pmdRecord.getKey()).numberOfViolations += numberOfViolations;
+            if (compilationUnits.containsKey(pmdRecord.getKey()))
+            {
+                compilationUnits.get(pmdRecord.getKey()).pmdRecords.addAll(pmdRecord.getValue());
             }
         }
 
-        List<CompilationUnitRecord> resultingRecords = new ArrayList<>();
-        for (Map.Entry<String, CompilationUnitRecord> record : compilationUnits.entrySet())
-        {
-            resultingRecords.add(record.getValue());
-        }
+        // Resulting records are all the values of the compilation units hash map
+        List<CompilationUnitRecord> resultingRecords = compilationUnits
+                .entrySet()
+                .stream().map(x -> x.getValue())
+                .collect(Collectors.toList());
 
         List<String> lines = new ArrayList<>();
         lines.add(CompilationUnitRecord.CSV_HEADER);
         lines.addAll(resultingRecords.stream().map(record -> record.asCsvRow()).collect(Collectors.toList()));
 
-        Path file = Paths.get("result.csv");
+        // Write result to file
+        Path file = Paths.get("result-1000.csv");
         try
         {
             Files.write(file, lines);
@@ -57,7 +62,7 @@ public class Main
         Map<String, List<PmdRecord>> compilationUnitIdToPmdRecords = new HashMap<>();
         try
         {
-            Files.lines(Paths.get(".", "pmd-report.csv")).skip(1).forEach(line -> {
+            Files.lines(Paths.get(".", "pmd-report-1000.csv")).skip(1).forEach(line -> {
                 PmdRecord pmdRecord = new PmdRecord(line);
                 if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
                     List<PmdRecord> initialPmdRecordList = new ArrayList<>();
@@ -80,6 +85,7 @@ public class Main
     {
         Map<String, CompilationUnitRecord> compilationUnits = new HashMap<>();
         File[] repositoryRootDirectories = new File("repositories/").listFiles(File::isDirectory);
+        int numberOfRepositoriesChecked = 0;
         for (File repositoryRootDirectory : repositoryRootDirectories)
         {
             List<CompilationUnitRecord> records = null;
@@ -87,6 +93,7 @@ public class Main
             records.forEach(record -> {
                 compilationUnits.put(record.compilationUnitId, record);
             });
+            System.out.println("[INFO] Checked " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
         }
         return compilationUnits;
     }
@@ -107,6 +114,38 @@ public class Main
             e.printStackTrace();
             return compilationUnitRecords;
         }
+
+        // Sum LOC of all project files
+        long projectLOC = paths
+                .stream()
+                .map(path ->
+                {
+                    try
+                    {
+                        return Files.lines(path).count();
+                    }
+                    catch (Throwable e)
+                    {
+                        try
+                        {
+                            return Files.lines(path, Charset.forName("ISO-8859-1")).count();
+                        }
+                        catch (Throwable ex)
+                        {
+                            try
+                            {
+                                return Files.lines(path, Charset.forName("UTF-16")).count();
+                            }
+                            catch (Throwable exc)
+                            {
+                                exc.printStackTrace();
+                            }
+                        }
+                        e.printStackTrace();
+                    }
+                    return 0L;
+                })
+                .reduce(0L, Long::sum);
 
         JavaParser parser = new JavaParser();
 
@@ -136,6 +175,7 @@ public class Main
 
             CompilationUnit compilationUnit = compilationUnitOptional.get();
 
+            // Classes and interfaces
             CompilationUnitRecord compilationUnitRecord = new CompilationUnitRecord(findCompilationUnitId(compilationUnit, path));
             compilationUnitRecord.classOrInterfaceNames.addAll(
                     compilationUnit
@@ -144,12 +184,43 @@ public class Main
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(Collectors.toList()));
 
+            // Methods
             compilationUnitRecord.methodNames.addAll(
                     compilationUnit
                         .findAll(MethodDeclaration.class)
                         .stream()
                         .map(NodeWithSimpleName::getNameAsString)
                         .collect(Collectors.toList()));
+
+            // Fields
+            compilationUnitRecord.fieldNames.addAll(
+                    compilationUnit.findAll(FieldDeclaration.class)
+                            .stream()
+                            .map(fieldDeclaration -> fieldDeclaration.getVariables())
+                            .flatMap(Collection::stream)
+                            .map(NodeWithSimpleName::getNameAsString)
+                            .collect(Collectors.toList()));
+
+            // Constructor parameters
+            compilationUnitRecord.parameterNames.addAll(
+                    compilationUnit.findAll(ConstructorDeclaration.class)
+                    .stream()
+                    .map(constructorDeclaration -> constructorDeclaration.getParameters())
+                    .flatMap(Collection::stream)
+                    .map(NodeWithSimpleName::getNameAsString)
+                    .collect(Collectors.toList()));
+
+            // Method parameters
+            compilationUnitRecord.parameterNames.addAll(
+                    compilationUnit.findAll(MethodDeclaration.class)
+                    .stream()
+                    .map(methodDeclaration -> methodDeclaration.getParameters())
+                    .flatMap(Collection::stream)
+                    .map(NodeWithSimpleName::getNameAsString)
+                    .collect(Collectors.toList())
+            );
+
+            compilationUnitRecord.projectLOC = projectLOC;
 
             compilationUnitRecords.add(compilationUnitRecord);
         }

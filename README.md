@@ -33,5 +33,5 @@ pmd.bat -d repositories\ -l java -t {nbrOfThreads} -f csv -R pmd-non-naming-rule
 
 #### Generate Report of Identifier Characteristics and Internal Code Quality Attributes
 ```
-java -jar ghtorrent-sampler.jar 
+java -jar java-name-and-quality-miner.jar 
 ```

@@ -61,11 +61,11 @@ class CompilationUnitRecord
             new Statistic("avg_casing_consistency_field",              IdentifiersCharacteristics.casingConsistency(fieldNames)),
             new Statistic("avg_casing_consistency_parameter",          IdentifiersCharacteristics.casingConsistency(parameterNames)),
 
-            new Statistic("avg_number_of_numbers",                    IdentifiersCharacteristics.averageNumberOfWords(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
-            new Statistic("avg_number_of_numbers_class_or_interface", IdentifiersCharacteristics.averageNumberOfWords(classOrInterfaceNames)),
-            new Statistic("avg_number_of_numbers_method",             IdentifiersCharacteristics.averageNumberOfWords(methodNames)),
-            new Statistic("avg_number_of_numbers_field",              IdentifiersCharacteristics.averageNumberOfWords(fieldNames)),
-            new Statistic("avg_number_of_numbers_parameter",          IdentifiersCharacteristics.averageNumberOfWords(parameterNames)),
+            new Statistic("avg_number_of_words",                    IdentifiersCharacteristics.averageNumberOfWords(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
+            new Statistic("avg_number_of_words_class_or_interface", IdentifiersCharacteristics.averageNumberOfWords(classOrInterfaceNames)),
+            new Statistic("avg_number_of_words_method",             IdentifiersCharacteristics.averageNumberOfWords(methodNames)),
+            new Statistic("avg_number_of_words_field",              IdentifiersCharacteristics.averageNumberOfWords(fieldNames)),
+            new Statistic("avg_number_of_words_parameter",          IdentifiersCharacteristics.averageNumberOfWords(parameterNames)),
 
             new Statistic("avg_number_of_numbers",                    IdentifiersCharacteristics.averageNumberOfNumbers(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
             new Statistic("avg_number_of_numbers_class_or_interface", IdentifiersCharacteristics.averageNumberOfNumbers(classOrInterfaceNames)),

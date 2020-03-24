@@ -1,7 +1,6 @@
 package io.hbp.com;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /*
 Independent variables:
@@ -25,50 +24,9 @@ Dependent variables:
 
 class CompilationUnitRecord
 {
-    public static final String CSV_HEADER =
-        "avg_length," +
-        "avg_length_class_or_interface," +
-        "avg_length_method," +
-        "avg_length_field," +
-        "avg_length_parameter," +
-
-        "avg_casing_consistency," +
-        "avg_casing_consistency_class_or_interface," +
-        "avg_casing_consistency_method," +
-        "avg_casing_consistency_field," +
-        "avg_casing_consistency_parameter," +
-
-        "avg_number_of_words," +
-        "avg_number_of_words_class_or_interface," +
-        "avg_number_of_words_method," +
-        "avg_number_of_words_field," +
-        "avg_number_of_words_parameter," +
-
-        "avg_number_of_numbers," +
-        "avg_number_of_numbers_class_or_interface," +
-        "avg_number_of_numbers_method," +
-        "avg_number_of_numbers_field," +
-        "avg_number_of_numbers_parameter," +
-
-        "project_loc," +
-        "number_of_violations," +
-
-        "number_of_best_practices_violations," +
-        "number_of_code_style_violations," +
-        "number_of_design_violations," +
-        "number_of_documentation_violations," +
-        "number_of_error_prone_violations," +
-        "number_of_multithreading_violations," +
-        "number_of_performance_violations," +
-        "number_of_security_violations," +
-
-        "avg_violation_priority";
 
     // {repo-name}\...\file.java
     String compilationUnitId;
-
-    // Dependent variables
-    int numberOfViolations = 0;
 
     // Independent variables
     long projectLOC = 0L;
@@ -87,45 +45,42 @@ class CompilationUnitRecord
         this.compilationUnitId = compilationUnitId;
     }
 
-    public String asCsvRow()
+    List<Statistic> statistics()
     {
-        return
-            IdentifierUtils.averageIdentifierLength(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
-            IdentifierUtils.averageIdentifierLength(classOrInterfaceNames) + "," +
-            IdentifierUtils.averageIdentifierLength(methodNames) + "," +
-            IdentifierUtils.averageIdentifierLength(fieldNames) + "," +
-            IdentifierUtils.averageIdentifierLength(parameterNames) + "," +
+        List<Statistic> statistics = Arrays.asList
+        (
+            new Statistic("avg_length",                    IdentifiersCharacteristics.averageIdentifierLength(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
+            new Statistic("avg_length_class_or_interface", IdentifiersCharacteristics.averageIdentifierLength(classOrInterfaceNames)),
+            new Statistic("avg_length_method",             IdentifiersCharacteristics.averageIdentifierLength(methodNames)),
+            new Statistic("avg_length_field",              IdentifiersCharacteristics.averageIdentifierLength(fieldNames)),
+            new Statistic("avg_length_parameter",          IdentifiersCharacteristics.averageIdentifierLength(parameterNames)),
 
-            IdentifierUtils.casingConsistency(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
-            IdentifierUtils.casingConsistency(classOrInterfaceNames) + "," +
-            IdentifierUtils.casingConsistency(methodNames) + "," +
-            IdentifierUtils.casingConsistency(fieldNames) + "," +
-            IdentifierUtils.casingConsistency(parameterNames) + "," +
+            new Statistic("avg_casing_consistency",                    IdentifiersCharacteristics.casingConsistency(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
+            new Statistic("avg_casing_consistency_class_or_interface", IdentifiersCharacteristics.casingConsistency(classOrInterfaceNames)),
+            new Statistic("avg_casing_consistency_method",             IdentifiersCharacteristics.casingConsistency(methodNames)),
+            new Statistic("avg_casing_consistency_field",              IdentifiersCharacteristics.casingConsistency(fieldNames)),
+            new Statistic("avg_casing_consistency_parameter",          IdentifiersCharacteristics.casingConsistency(parameterNames)),
 
-            IdentifierUtils.averageNumberOfWords(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
-            IdentifierUtils.averageNumberOfWords(classOrInterfaceNames) + "," +
-            IdentifierUtils.averageNumberOfWords(methodNames) + "," +
-            IdentifierUtils.averageNumberOfWords(fieldNames) + "," +
-            IdentifierUtils.averageNumberOfWords(parameterNames) + "," +
+            new Statistic("avg_number_of_numbers",                    IdentifiersCharacteristics.averageNumberOfWords(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
+            new Statistic("avg_number_of_numbers_class_or_interface", IdentifiersCharacteristics.averageNumberOfWords(classOrInterfaceNames)),
+            new Statistic("avg_number_of_numbers_method",             IdentifiersCharacteristics.averageNumberOfWords(methodNames)),
+            new Statistic("avg_number_of_numbers_field",              IdentifiersCharacteristics.averageNumberOfWords(fieldNames)),
+            new Statistic("avg_number_of_numbers_parameter",          IdentifiersCharacteristics.averageNumberOfWords(parameterNames)),
 
-            IdentifierUtils.averageNumberOfNumbers(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames)) + "," +
-            IdentifierUtils.averageNumberOfNumbers(classOrInterfaceNames) + "," +
-            IdentifierUtils.averageNumberOfNumbers(methodNames) + "," +
-            IdentifierUtils.averageNumberOfNumbers(fieldNames) + "," +
-            IdentifierUtils.averageNumberOfNumbers(parameterNames) + "," +
+            new Statistic("avg_number_of_numbers",                    IdentifiersCharacteristics.averageNumberOfNumbers(ListUtils.join(classOrInterfaceNames, methodNames, fieldNames, parameterNames))),
+            new Statistic("avg_number_of_numbers_class_or_interface", IdentifiersCharacteristics.averageNumberOfNumbers(classOrInterfaceNames)),
+            new Statistic("avg_number_of_numbers_method",             IdentifiersCharacteristics.averageNumberOfNumbers(methodNames)),
+            new Statistic("avg_number_of_numbers_field",              IdentifiersCharacteristics.averageNumberOfNumbers(fieldNames)),
+            new Statistic("avg_number_of_numbers_parameter",          IdentifiersCharacteristics.averageNumberOfNumbers(parameterNames)),
 
-            projectLOC + "," +
-            numberOfViolations + "," +
+            new Statistic("project_loc", String.valueOf(projectLOC)),
+            new Statistic("number_of_violations", String.valueOf(pmdRecords.size())),
 
-            ViolationsUtils.numberOfViolations(pmdRecords, "Best Practices") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Code Style") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Design") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Documentation") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Error Prone") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Multithreading") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Performance") + "," +
-            ViolationsUtils.numberOfViolations(pmdRecords, "Security") + "," +
-
-            ViolationsUtils.averagePriority(pmdRecords);
+            new Statistic("number_of_violations_security",        Violations.numberOfViolations(pmdRecords, QualityType.SECURITY)),
+            new Statistic("number_of_violations_maintainability", Violations.numberOfViolations(pmdRecords, QualityType.MAINTAINABILITY)),
+            new Statistic("number_of_violations_performance",     Violations.numberOfViolations(pmdRecords, QualityType.PERFORMANCE)),
+            new Statistic("number_of_violations_reliability",     Violations.numberOfViolations(pmdRecords, QualityType.RELIABILITY))
+        );
+        return statistics;
     }
 }

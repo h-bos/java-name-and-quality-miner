@@ -2,15 +2,15 @@ package io.hbp.com;
 
 import java.util.List;
 
-public class IdentifierUtils
+class IdentifiersCharacteristics
 {
-    static float averageIdentifierLength(List<String> identifiers)
+    static String averageIdentifierLength(List<String> identifiers)
     {
-        if (identifiers.size() == 0) return 0;
-        return identifiers.stream().mapToInt(String::length).sum() / (float) identifiers.size();
+        if (identifiers.size() == 0) return String.valueOf(0);
+        return String.valueOf(identifiers.stream().mapToInt(String::length).sum() / (float) identifiers.size());
     }
 
-    static float casingConsistency(List<String> identifiers)
+    static String casingConsistency(List<String> identifiers)
     {
         int numberOfCamel = 0;
         int numberOfPascal = 0;
@@ -61,12 +61,12 @@ public class IdentifierUtils
 
         float avgConsistency = sum == 0 ? 1.0f : (float) max / sum;
 
-        return avgConsistency;
+        return String.valueOf(avgConsistency);
     }
 
-    static float averageNumberOfNumbers(List<String> identifiers)
+    static String averageNumberOfNumbers(List<String> identifiers)
     {
-        if (identifiers.isEmpty()) return 0.0f;
+        if (identifiers.isEmpty()) return String.valueOf(0.0f);
         float avgNumberOfNumbers = 0.0f;
         for (String identifier : identifiers)
         {
@@ -79,11 +79,11 @@ public class IdentifierUtils
                 }
             }
         }
-        return avgNumberOfNumbers / (float) identifiers.size();
+        return String.valueOf(avgNumberOfNumbers / (float) identifiers.size());
     }
 
     // A word is split with underscores, casing changes, or numbers.
-    static float averageNumberOfWords(List<String> identifiers)
+    static String averageNumberOfWords(List<String> identifiers)
     {
         int numberOfWordsSum = 0;
         for (String identifier : identifiers)
@@ -107,7 +107,7 @@ public class IdentifierUtils
                 }
             }
         }
-        return numberOfWordsSum;
+        return String.valueOf(numberOfWordsSum);
     }
 
     private static boolean hasCasingChanged(char left, char right)

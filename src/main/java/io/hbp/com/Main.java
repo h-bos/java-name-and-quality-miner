@@ -40,9 +40,20 @@ public class Main
                 .stream().map(x -> x.getValue())
                 .collect(Collectors.toList());
 
+        List<List<Statistic>> compilationsUnitsStatistics = resultingRecords
+                .stream()
+                .map(compilationUnitRecord -> compilationUnitRecord.statistics())
+                .collect(Collectors.toList());
+
+        if (compilationsUnitsStatistics.size() < 1) return;
+
+        String header = compilationsUnitsStatistics.get(0).stream().map(statistic -> statistic.id).collect(Collectors.joining(","));
         List<String> lines = new ArrayList<>();
-        lines.add(CompilationUnitRecord.CSV_HEADER);
-        lines.addAll(resultingRecords.stream().map(record -> record.asCsvRow()).collect(Collectors.toList()));
+        lines.add(header);
+        for (List<Statistic> statistics : compilationsUnitsStatistics)
+        {
+            lines.add(statistics.stream().map(statistic -> statistic.value).collect(Collectors.joining(",")));
+        }
 
         // Write result to file
         Path file = Paths.get("result-1000.csv");
@@ -52,9 +63,11 @@ public class Main
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Log.error(e);
             System.exit(1);
         }
+
+        Log.writeToFile("log.txt");
     }
 
     private static Map<String, List<PmdRecord>> findPmdRecords()
@@ -62,7 +75,7 @@ public class Main
         Map<String, List<PmdRecord>> compilationUnitIdToPmdRecords = new HashMap<>();
         try
         {
-            Files.lines(Paths.get(".", "pmd-report-1000.csv")).skip(1).forEach(line -> {
+            Files.lines(Paths.get(".", "pmd-report.csv")).skip(1).forEach(line -> {
                 PmdRecord pmdRecord = new PmdRecord(line);
                 if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
                     List<PmdRecord> initialPmdRecordList = new ArrayList<>();
@@ -75,8 +88,7 @@ public class Main
         }
         catch (IOException e)
         {
-            System.out.println("[ERROR] No PMD records found.");
-            e.printStackTrace();
+            Log.error(e);
         }
         return compilationUnitIdToPmdRecords;
     }
@@ -93,7 +105,7 @@ public class Main
             records.forEach(record -> {
                 compilationUnits.put(record.compilationUnitId, record);
             });
-            System.out.println("[INFO] Checked " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
+            Log.info("Checked " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
         }
         return compilationUnits;
     }
@@ -111,7 +123,7 @@ public class Main
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Log.error(e);
             return compilationUnitRecords;
         }
 
@@ -158,18 +170,18 @@ public class Main
             }
             catch (Throwable th)
             {
-                System.out.println("[WARNING] File could not be parsed: " + path.toString());
+                Log.info("File could not be parsed " + path.toString());
                 continue;
             }
             if (!parseResult.isSuccessful()) {
-                System.out.println("[WARNING] Parse result was not successful: " + path.toString());
+                Log.info("Parse result was not successful " + path.toString());
                 continue;
             }
 
             Optional<CompilationUnit> compilationUnitOptional = parseResult.getResult();
 
             if (!compilationUnitOptional.isPresent()) {
-                System.out.println("[WARNING] Compilation unit is not present: " + path.toString());
+                Log.info("Compilation unit is not present " + path.toString());
                 continue;
             }
 

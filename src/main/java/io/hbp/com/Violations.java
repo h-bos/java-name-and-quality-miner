@@ -19,28 +19,30 @@ class Violations
 
     static String numberOfViolations(List<PmdRecord> pmdRecords, QualityType qualityType)
     {
+        long numberOfViolations = 0;
         switch (qualityType)
         {
             case SECURITY:
-                return String.valueOf(numberOfViolations(pmdRecords, "Security"));
+                numberOfViolations = numberOfViolations(pmdRecords, "Security");
+                break;
             case PERFORMANCE:
-                return String.valueOf(numberOfViolations(pmdRecords, "Performance"));
+                numberOfViolations = numberOfViolations(pmdRecords, "Performance");
+                break;
             case MAINTAINABILITY:
-                return String.valueOf
-                (
+                numberOfViolations =
                     numberOfViolations(pmdRecords, "Best Practices") +
                     numberOfViolations(pmdRecords, "Code Style") +
                     numberOfViolations(pmdRecords, "Documentation") +
-                    numberOfViolations(pmdRecords, "Design")
-                );
+                    numberOfViolations(pmdRecords, "Design");
+                break;
             case RELIABILITY:
-                return String.valueOf
-                    (
-                        numberOfViolations(pmdRecords, "Multithreading") +
-                        numberOfViolations(pmdRecords, "Error Prone")
-                    );
+                numberOfViolations =
+                    numberOfViolations(pmdRecords, "Multithreading") +
+                    numberOfViolations(pmdRecords, "Error Prone");
+                break;
         }
-        return "0";
+        Log.info("Violations found " + String.valueOf(numberOfViolations));
+        return String.valueOf(numberOfViolations);
     }
 
     static String totalNumberOfViolations(List<PmdRecord> pmdRecords)

@@ -74,7 +74,7 @@ class CompilationUnitRecord
             new Statistic("avg_number_of_numbers_parameter",          IdentifiersCharacteristics.averageNumberOfNumbers(parameterNames)),
 
             new Statistic("project_loc", String.valueOf(projectLOC)),
-            new Statistic("number_of_violations", String.valueOf(pmdRecords.size())),
+            new Statistic("number_of_violations", Violations.totalNumberOfViolations(pmdRecords)),
 
             new Statistic("number_of_violations_security",        Violations.numberOfViolations(pmdRecords, QualityType.SECURITY)),
             new Statistic("number_of_violations_maintainability", Violations.numberOfViolations(pmdRecords, QualityType.MAINTAINABILITY)),

@@ -34,6 +34,6 @@ class PmdRecord
         // Split file path and take the last part which is the file or root class name.
         String[] fileParts = file.split("\\\\");
         String rootClassName = fileParts[fileParts.length - 1];
-        compilationUnitId = packageName + rootClassName;
+        compilationUnitId = packageName + '.' + rootClassName;
     }
 }

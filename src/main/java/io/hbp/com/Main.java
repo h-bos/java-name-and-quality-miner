@@ -75,7 +75,7 @@ public class Main
         Map<String, List<PmdRecord>> compilationUnitIdToPmdRecords = new HashMap<>();
         try
         {
-            Files.lines(Paths.get(".", "pmd-report.csv")).skip(1).forEach(line -> {
+            Files.lines(Paths.get(".", "pmd-report-1000.csv")).skip(1).forEach(line -> {
                 PmdRecord pmdRecord = new PmdRecord(line);
                 if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
                     List<PmdRecord> initialPmdRecordList = new ArrayList<>();

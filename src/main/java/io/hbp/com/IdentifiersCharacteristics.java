@@ -85,6 +85,7 @@ class IdentifiersCharacteristics
     // A word is split with underscores, casing changes, or numbers.
     static String averageNumberOfWords(List<String> identifiers)
     {
+        if (identifiers.isEmpty()) return String.valueOf(0.0f);
         int numberOfWordsSum = 0;
         for (String identifier : identifiers)
         {
@@ -107,7 +108,7 @@ class IdentifiersCharacteristics
                 }
             }
         }
-        return String.valueOf(numberOfWordsSum);
+        return String.valueOf(numberOfWordsSum / (float) identifiers.size());
     }
 
     private static boolean hasCasingChanged(char left, char right)

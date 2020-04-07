@@ -15,6 +15,7 @@ class PmdRecord
     String description;
     String ruleSet;
     String ruleId;
+    String projectName;
 
     PmdRecord(String csvLine)
     {
@@ -33,6 +34,7 @@ class PmdRecord
 
         // Split file path and take the last part which is the file or root class name.
         String[] fileParts = file.split("\\\\");
+        projectName = fileParts[0];
         String rootClassName = fileParts[fileParts.length - 1];
         compilationUnitId = packageName + '.' + rootClassName;
     }

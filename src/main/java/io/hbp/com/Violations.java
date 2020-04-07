@@ -1,7 +1,6 @@
 package io.hbp.com;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 class Violations
 {

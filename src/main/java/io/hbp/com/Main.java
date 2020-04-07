@@ -23,34 +23,34 @@ public class Main
     public static void main(String[] args)
     {
         Map<String, List<PmdRecord>> pmdRecords = findPmdRecords();
-        Map<String, CompilationUnitRecord> compilationUnits = findCompilationUnits();
+        Map<String, Project> projects = findProjects();
 
         // Add PMD violations to the compilation units that have them.
         for (Map.Entry<String, List<PmdRecord>> pmdRecord : pmdRecords.entrySet())
         {
-            if (compilationUnits.containsKey(pmdRecord.getKey()))
+            if (projects.containsKey(pmdRecord.getKey()))
             {
-                compilationUnits.get(pmdRecord.getKey()).pmdRecords.addAll(pmdRecord.getValue());
+                projects.get(pmdRecord.getKey()).pmdRecords.addAll(pmdRecord.getValue());
             }
         }
 
         // Resulting records are all the values of the compilation units hash map
-        List<CompilationUnitRecord> resultingRecords = compilationUnits
+        List<Project> resultingProjects = projects
                 .entrySet()
                 .stream().map(x -> x.getValue())
                 .collect(Collectors.toList());
 
-        List<List<Statistic>> compilationsUnitsStatistics = resultingRecords
+        List<List<Statistic>> projectStatistics = resultingProjects
                 .stream()
                 .map(compilationUnitRecord -> compilationUnitRecord.statistics())
                 .collect(Collectors.toList());
 
-        if (compilationsUnitsStatistics.size() < 1) return;
+        if (projectStatistics.size() < 1) return;
 
-        String header = compilationsUnitsStatistics.get(0).stream().map(statistic -> statistic.id).collect(Collectors.joining(","));
+        String header = projectStatistics.get(0).stream().map(statistic -> statistic.id).collect(Collectors.joining(","));
         List<String> lines = new ArrayList<>();
         lines.add(header);
-        for (List<Statistic> statistics : compilationsUnitsStatistics)
+        for (List<Statistic> statistics : projectStatistics)
         {
             lines.add(statistics.stream().map(statistic -> statistic.value).collect(Collectors.joining(",")));
         }
@@ -77,12 +77,12 @@ public class Main
         {
             Files.lines(Paths.get(".", "pmd-report-1000.csv")).skip(1).forEach(line -> {
                 PmdRecord pmdRecord = new PmdRecord(line);
-                if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.compilationUnitId)) {
+                if (!compilationUnitIdToPmdRecords.containsKey(pmdRecord.projectName)) {
                     List<PmdRecord> initialPmdRecordList = new ArrayList<>();
                     initialPmdRecordList.add(pmdRecord);
-                    compilationUnitIdToPmdRecords.put(pmdRecord.compilationUnitId, initialPmdRecordList);
+                    compilationUnitIdToPmdRecords.put(pmdRecord.projectName, initialPmdRecordList);
                 } else {
-                    compilationUnitIdToPmdRecords.get(pmdRecord.compilationUnitId).add(pmdRecord);
+                    compilationUnitIdToPmdRecords.get(pmdRecord.projectName).add(pmdRecord);
                 }
             });
         }
@@ -93,26 +93,24 @@ public class Main
         return compilationUnitIdToPmdRecords;
     }
 
-    private static Map<String, CompilationUnitRecord> findCompilationUnits()
+    private static Map<String, Project> findProjects()
     {
-        Map<String, CompilationUnitRecord> compilationUnits = new HashMap<>();
+        Map<String, Project> projects = new HashMap<>();
         File[] repositoryRootDirectories = new File("repositories/").listFiles(File::isDirectory);
         int numberOfRepositoriesChecked = 0;
         for (File repositoryRootDirectory : repositoryRootDirectories)
         {
-            List<CompilationUnitRecord> records = null;
-            records = findCompilationUnitsOfRepository(repositoryRootDirectory.toPath());
-            records.forEach(record -> {
-                compilationUnits.put(record.compilationUnitId, record);
-            });
+            Project project = findProjectCharacteristics(repositoryRootDirectory.toPath());
+            projects.put(project.projectId, project);
             Log.info("Checked " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
         }
-        return compilationUnits;
+        return projects;
     }
 
-    private static List<CompilationUnitRecord> findCompilationUnitsOfRepository(Path repositoryPath)
+    private static Project findProjectCharacteristics(Path repositoryPath)
     {
-        List<CompilationUnitRecord> compilationUnitRecords = new ArrayList<>();
+        Log.info(repositoryPath.getFileName().toString());
+        Project project = new Project(repositoryPath.getFileName().toString());
 
         List<Path> paths;
         try
@@ -124,11 +122,11 @@ public class Main
         catch (IOException e)
         {
             Log.error(e);
-            return compilationUnitRecords;
+            return project;
         }
 
         // Sum LOC of all project files
-        long projectLOC = paths
+        project.projectLOC = paths
                 .stream()
                 .map(path ->
                 {
@@ -188,8 +186,7 @@ public class Main
             CompilationUnit compilationUnit = compilationUnitOptional.get();
 
             // Classes and interfaces
-            CompilationUnitRecord compilationUnitRecord = new CompilationUnitRecord(findCompilationUnitId(compilationUnit, path));
-            compilationUnitRecord.classOrInterfaceNames.addAll(
+            project.classOrInterfaceNames.addAll(
                     compilationUnit
                             .findAll(ClassOrInterfaceDeclaration.class)
                             .stream()
@@ -197,7 +194,7 @@ public class Main
                             .collect(Collectors.toList()));
 
             // Methods
-            compilationUnitRecord.methodNames.addAll(
+            project.methodNames.addAll(
                     compilationUnit
                         .findAll(MethodDeclaration.class)
                         .stream()
@@ -205,7 +202,7 @@ public class Main
                         .collect(Collectors.toList()));
 
             // Fields
-            compilationUnitRecord.fieldNames.addAll(
+            project.fieldNames.addAll(
                     compilationUnit.findAll(FieldDeclaration.class)
                             .stream()
                             .map(fieldDeclaration -> fieldDeclaration.getVariables())
@@ -214,7 +211,7 @@ public class Main
                             .collect(Collectors.toList()));
 
             // Constructor parameters
-            compilationUnitRecord.parameterNames.addAll(
+            project.parameterNames.addAll(
                     compilationUnit.findAll(ConstructorDeclaration.class)
                     .stream()
                     .map(constructorDeclaration -> constructorDeclaration.getParameters())
@@ -223,7 +220,7 @@ public class Main
                     .collect(Collectors.toList()));
 
             // Method parameters
-            compilationUnitRecord.parameterNames.addAll(
+            project.parameterNames.addAll(
                     compilationUnit.findAll(MethodDeclaration.class)
                     .stream()
                     .map(methodDeclaration -> methodDeclaration.getParameters())
@@ -231,13 +228,9 @@ public class Main
                     .map(NodeWithSimpleName::getNameAsString)
                     .collect(Collectors.toList())
             );
-
-            compilationUnitRecord.projectLOC = projectLOC;
-
-            compilationUnitRecords.add(compilationUnitRecord);
         }
 
-        return compilationUnitRecords;
+        return project;
     }
 
     private static String findCompilationUnitId(CompilationUnit compilationUnit, Path path)

@@ -25,7 +25,7 @@ class Log
         stringBuilder.append(System.getProperty("line.separator"));
     }
 
-    static void error(Exception exception)
+    static void error(Throwable exception)
     {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);

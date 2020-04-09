@@ -1,6 +1,6 @@
 package io.hbp.com;
 
-class PmdRecord
+class Violation
 {
     // {package} + {className}
     // Ex. org.jboss.as.weld.deployment.processorsWeldDeploymentCleanupProcessor.java
@@ -17,7 +17,7 @@ class PmdRecord
     String ruleId;
     String projectName;
 
-    PmdRecord(String csvLine)
+    Violation(String csvLine)
     {
         // First we remove the leftmost and rightmost quotes from the line. After that, the rest of the line can be
         // split on ",". Ex line: "16","concurrentDS",{...},"LocalVariableCouldBeFinal"

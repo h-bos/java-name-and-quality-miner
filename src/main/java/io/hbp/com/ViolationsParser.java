@@ -46,6 +46,8 @@ public class ViolationsParser
             ));
         }
 
+        RuleContext ruleContext = new RuleContext();
+
         for (List<SourceFile> sourceFileBatch : sourceFileBatches)
         {
             List<DataSource> sources = sourceFileBatch
@@ -66,7 +68,7 @@ public class ViolationsParser
 
             try
             {
-                PMD.processFiles(pmdConfiguration, ruleSetFactory, sources, new RuleContext(), List.of(inMemoryRenderer));
+                PMD.processFiles(pmdConfiguration, ruleSetFactory, sources, ruleContext, List.of(inMemoryRenderer));
             }
             catch (Error e)
             {
@@ -94,8 +96,8 @@ public class ViolationsParser
                 sourceFile.violations.add(new Violation(ruleViolation));
             });
 
-            inMemoryRenderer.processingErrors.forEachRemaining(ruleViolation -> {
-                String relativeFileName = ruleViolation.getFile().replace(absolutePathRootPath, "");
+            inMemoryRenderer.processingErrors.forEachRemaining(processingError -> {
+                String relativeFileName = processingError.getFile().replace(absolutePathRootPath, "");
                 SourceFile sourceFile = sourceFileBatch
                         .stream()
                         .filter(file -> file.fileName.equals(relativeFileName))
@@ -103,8 +105,6 @@ public class ViolationsParser
                         .get(0);
                 sourceFile.parsedSuccessfully = false;
             });
-
-            inMemoryRenderer.flush();
         }
     }
 }

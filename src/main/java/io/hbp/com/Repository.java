@@ -23,15 +23,9 @@ class Repository
         List<List<RecordValue>> records = sourceFiles.stream().map(SourceFile::asRecords).flatMap(List::stream).collect(Collectors.toList());
         for (List<RecordValue> record : records)
         {
-            // Add repository int ID to records for easy filtering to records
             record.add(new RecordValue("repository_id" , id));
-
-            // Add repository folder name
             record.add(new RecordValue("repository", repositoryName));
-
-            // Add repository LOC to records
-            long repositoryLinesOfCode = this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum();
-            record.add(new RecordValue("repository_loc" , repositoryLinesOfCode));
+            record.add(new RecordValue("repository_loc" , this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum()));
         }
         return records;
     }
@@ -51,5 +45,18 @@ class Repository
             ));
         }
         return records;
+    }
+
+    public List<RecordValue> repositoryRecord()
+    {
+        return List.of
+        (
+            new RecordValue("repository_id", repositoryID),
+            new RecordValue("repository", repositoryName),
+            new RecordValue("repository_loc", this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum()),
+            new RecordValue("violations", this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum()),
+            new RecordValue("parse_success_amount", this.sourceFiles.stream().filter(x -> x.parsedSuccessfully).count()),
+            new RecordValue("parse_fail_amount", this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count())
+        );
     }
 }

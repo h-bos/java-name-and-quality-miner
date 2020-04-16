@@ -47,7 +47,7 @@ public class CsvWriter
         }
     }
 
-    public void clearRecords(String fileName)
+    public void clearFile(String fileName)
     {
         try
         {

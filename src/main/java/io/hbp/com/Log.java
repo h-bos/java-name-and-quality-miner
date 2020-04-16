@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-class Log
+public class Log
 {
-    static StringBuilder stringBuilder = new StringBuilder();
+    private static StringBuilder stringBuilder = new StringBuilder();
 
-    static void info(String info)
+    public static void info(String info)
     {
         String message = "[INFO] " + info;
         System.out.println(message);
@@ -17,7 +17,7 @@ class Log
         stringBuilder.append(System.getProperty("line.separator"));
     }
 
-    static void error(String error)
+    public static void error(String error)
     {
         String message = "[ERROR] " + error;
         System.out.println(message);
@@ -25,7 +25,7 @@ class Log
         stringBuilder.append(System.getProperty("line.separator"));
     }
 
-    static void error(Throwable exception)
+    public static void error(Throwable exception)
     {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);
@@ -36,17 +36,16 @@ class Log
         stringBuilder.append(System.getProperty("line.separator"));
     }
 
-    static void writeToFile(String fileName)
+    public static void writeToFile()
     {
-        try (FileWriter writer = new FileWriter(fileName))
+        try (FileWriter writer = new FileWriter(Main.LOG_FILE))
         {
-            Log.info("Writing log to file " + fileName);
+            Log.info("Writing log to file " + Main.LOG_FILE);
             writer.write(stringBuilder.toString());
         }
         catch (IOException e)
         {
             e.printStackTrace();
-            return;
         }
     }
 }

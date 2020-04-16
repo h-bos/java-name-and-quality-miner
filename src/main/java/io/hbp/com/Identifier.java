@@ -1,14 +1,17 @@
 package io.hbp.com;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-class Identifier
+public class Identifier
 {
-    enum Type
+    public enum Type
     {
-        CLASS_INTERFACE_ENUM("class_interface_enum"), METHOD("method"), FIELD("field"), PARAMETER("parameter");
+        ENUM("enum"),
+        ENUM_CONSTANT("enum_constant"),
+        INTERFACE("interface"),
+        CLASS("class"),
+        FIELD("field"),
+        METHOD("method"),
+        PARAMETER("parameter"),
+        LOCAL_VARIABLE("variable");
 
         String value;
 
@@ -18,30 +21,24 @@ class Identifier
         }
     }
 
-    enum CasingType
+    public enum CasingType
     {
         CAMEL, PASCAL, UNDERLINE, HUNGARIAN, OTHER
     }
 
-    String name;
+    public String name;
 
-    int numberOfCompilationUnitViolations;
-    int numberOfRepositoryViolations;
+    public Type type;
 
-    long compilationUnitLOC;
-    long repositoryLOC;
+    public float casingConsistency;
 
-    Type type;
-
-    Identifier() {}
-
-    Identifier(String name, Type type)
+    public Identifier(String name, Type type)
     {
         this.name = name;
         this.type = type;
     }
 
-    CasingType type()
+    public CasingType type()
     {
         // Regexes from:
         //  "How are Identifiers Named in Open Source Software On Popularity and Consistency"
@@ -65,44 +62,51 @@ class Identifier
         return CasingType.OTHER;
     }
 
-    int length()
+    public int numberOfWords()
     {
-        return name == null ? 0 : name.length();
-    }
-
-    int numberOfWords()
-    {
-        if (length() <= 0)
+        if (name.length() <= 0)
         {
             return 0;
         }
 
-        int numberOfWords = 0;
-        char[] chars = name.toCharArray();
-
-        numberOfWords++;
-
-        if (chars.length < 2)
+        if (name.length() <= 1)
         {
-            return numberOfWords;
+            return 1;
         }
 
-        char prev = chars[0];
-        for (int i = 1;  i < chars.length; i++)
+        if (name.length() <= 2)
         {
-            char current = chars[i];
-            if (hasCasingChanged(prev, current))
+            return 2;
+        }
+
+        char[] chars = name.toCharArray();
+
+        int numberOfWords = 0;
+
+        int i = 1;
+        while (i < chars.length - 1)
+        {
+            ++numberOfWords;
+            while ((i + 1) < chars.length - 1 && !hasCasingChanged(chars[i], chars[i + 1]) && !isSplitter(chars[i + 1]))
             {
-                numberOfWords++;
+                ++i;
+            }
+            if (isSplitter(chars[i + 1]))
+            {
+                i += 2;
+            }
+            else
+            {
+                ++i;
             }
         }
 
         return numberOfWords;
     }
 
-    int numberOfNumbers()
+    public int numberOfNumbers()
     {
-        if (length() <= 0)
+        if (name.length() <= 0)
         {
             return 0;
         }
@@ -133,26 +137,11 @@ class Identifier
         {
             return false;
         }
-        if (left == '_' && right == '_')
-        {
-            return false;
-        }
         return true;
     }
 
-    List<Statistic> statistics()
+    private static boolean isSplitter(char c)
     {
-        return Arrays.asList
-            (
-                new Statistic("id", name),
-                new Statistic("compilation_unit_violations", numberOfCompilationUnitViolations),
-                new Statistic("repository_violations", numberOfRepositoryViolations),
-                new Statistic("type", type == null ? "NA" : type.value),
-                new Statistic("length", length()),
-                new Statistic("words", numberOfWords()),
-                new Statistic("numbers", numberOfNumbers()),
-                new Statistic("compilation_unit_loc", compilationUnitLOC),
-                new Statistic("repository_loc", repositoryLOC)
-            );
+        return c == '_' || c == '-';
     }
 }

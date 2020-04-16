@@ -1,41 +1,40 @@
 package io.hbp.com;
 
-class Violation
+import net.sourceforge.pmd.RuleViolation;
+
+public class Violation
 {
-    // {package} + {className}
-    // Ex. org.jboss.as.weld.deployment.processorsWeldDeploymentCleanupProcessor.java
-    String compilationUnitId;
-
-    String problem;
-    String packageName;
-    String file;
-    // [1,5] low value => high priority
-    int priority;
-    int lineNumber;
-    String description;
-    String ruleSet;
-    String ruleId;
-    String projectName;
-
-    Violation(String csvLine)
+    public enum QualityCharacteristic
     {
-        // First we remove the leftmost and rightmost quotes from the line. After that, the rest of the line can be
-        // split on ",". Ex line: "16","concurrentDS",{...},"LocalVariableCouldBeFinal"
-        csvLine = csvLine.substring(1, csvLine.length() - 1);
-        String[] parts = csvLine.split("\",\"");
-        problem     = parts[0];
-        packageName = parts[1];
-        file        = parts[2];
-        priority    = Integer.parseInt(parts[3]);
-        lineNumber  = Integer.parseInt(parts[4]);
-        description = parts[5];
-        ruleSet     = parts[6];
-        ruleId      = parts[7];
+        SECURITY, MAINTAINABILITY, PERFORMANCE, RELIABILITY
+    }
 
-        // Split file path and take the last part which is the file or root class name.
-        String[] fileParts = file.split("\\\\");
-        projectName = fileParts[0];
-        String rootClassName = fileParts[fileParts.length - 1];
-        compilationUnitId = packageName + '.' + rootClassName;
+    public String ruleSet;
+
+    public QualityCharacteristic qualityCharacteristic;
+
+    public Violation(RuleViolation pmdViolation)
+    {
+        ruleSet = pmdViolation.getRule().getRuleSetName();
+
+        switch (ruleSet)
+        {
+            case "Security":
+                qualityCharacteristic = QualityCharacteristic.SECURITY;
+                break;
+            case "Performance":
+                qualityCharacteristic = QualityCharacteristic.PERFORMANCE;
+                break;
+            case "Best Practices":
+            case "Code Style":
+            case "Documentation":
+            case "Design":
+                qualityCharacteristic = QualityCharacteristic.MAINTAINABILITY;
+                break;
+            case "Multithreading":
+            case "Error Prone":
+                qualityCharacteristic = QualityCharacteristic.RELIABILITY;
+                break;
+        }
     }
 }

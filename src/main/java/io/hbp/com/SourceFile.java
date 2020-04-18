@@ -87,32 +87,26 @@ public class SourceFile
         }
     }
 
-    public List<List<RecordValue>> asRecords()
+    public List<List<Object>> getIdentifierRecords()
     {
         evaluateCasingConsistency();
 
-        // Down sampling by only including first occurrence of each identifier type.
-        Map<Identifier.Type, List<Identifier>> identifiersGroup = identifiers
-                .stream()
-                .collect(Collectors.groupingBy(x -> x.type));
-
-        List<List<RecordValue>> compilationUnitStatistics = new ArrayList<>();
-        for (Map.Entry<Identifier.Type, List<Identifier>> entry : identifiersGroup.entrySet())
+        List<List<Object>> sourceFileStatistics = new ArrayList<>();
+        for (Identifier identifier : identifiers)
         {
-            Identifier identifier = entry.getValue().get(0);
-            List<RecordValue> identifierRecordValues = new ArrayList<>();
-            identifierRecordValues.add(new RecordValue("file", fileName));
-            identifierRecordValues.add(new RecordValue("name", identifier.name));
-            identifierRecordValues.add(new RecordValue("type", identifier.type.value));
-            identifierRecordValues.add(new RecordValue("length", identifier.name.length()));
-            identifierRecordValues.add(new RecordValue("words", identifier.numberOfWords()));
-            identifierRecordValues.add(new RecordValue("numbers", identifier.numberOfNumbers()));
-            identifierRecordValues.add(new RecordValue("casing_consistency", identifier.casingConsistency));
-            identifierRecordValues.add(new RecordValue("source_file_loc", linesOfCode));
-            identifierRecordValues.add(new RecordValue("violations", violations.size()));
-            identifierRecordValues.add(new RecordValue("parsed_successfully", parsedSuccessfully));
-            compilationUnitStatistics.add(identifierRecordValues);
+            List<Object> identifierRecordValues = new ArrayList<>();
+            identifierRecordValues.add(fileName);
+            identifierRecordValues.add(identifier.name);
+            identifierRecordValues.add(identifier.type.value);
+            identifierRecordValues.add(identifier.name.length());
+            identifierRecordValues.add(identifier.numberOfWords());
+            identifierRecordValues.add(identifier.numberOfNumbers());
+            identifierRecordValues.add(identifier.casingConsistency);
+            identifierRecordValues.add(linesOfCode);
+            identifierRecordValues.add(violations.size());
+            identifierRecordValues.add(parsedSuccessfully);
+            sourceFileStatistics.add(identifierRecordValues);
         }
-        return compilationUnitStatistics;
+        return sourceFileStatistics;
     }
 }

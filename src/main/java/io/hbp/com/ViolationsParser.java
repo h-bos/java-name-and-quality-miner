@@ -1,5 +1,10 @@
 package io.hbp.com;
 
+import com.github.javaparser.printer.lexicalpreservation.PhantomNodeLogic;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+import com.github.javaparser.symbolsolver.resolution.typeinference.TypeInferenceCache;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.utils.SourceRoot;
 import net.sourceforge.pmd.*;
 import net.sourceforge.pmd.util.datasource.DataSource;
 import net.sourceforge.pmd.util.datasource.FileDataSource;
@@ -12,22 +17,21 @@ import java.util.stream.Collectors;
 
 public class ViolationsParser
 {
-    public PMDConfiguration pmdConfiguration;
-    public RuleSetFactory ruleSetFactory;
-
-    public ViolationsParser()
-    {
-        pmdConfiguration = new PMDConfiguration();
-        pmdConfiguration.setRuleSets("pmd-non-naming-rules.xml");
-        pmdConfiguration.setThreads(Runtime.getRuntime().availableProcessors());
-        pmdConfiguration.setMinimumPriority(RulePriority.LOW);
-        pmdConfiguration.setIgnoreIncrementalAnalysis(true);
-        pmdConfiguration.setShowSuppressedViolations(false);
-        ruleSetFactory = RulesetsFactoryUtils.createFactory(pmdConfiguration);
-    }
-
     public void parseAndAddViolationsTo(Repository repository)
     {
+        JavaParserFacade.clearInstances();
+        PhantomNodeLogic.cleanUpCache();
+
+        PMDConfiguration pmdConfiguration = new PMDConfiguration();
+        RuleSetFactory ruleSetFactory = RulesetsFactoryUtils.createFactory(pmdConfiguration);
+        InMemoryRenderer inMemoryRenderer = new InMemoryRenderer();
+
+        pmdConfiguration.setRuleSets("pmd-non-naming-rules.xml");
+        pmdConfiguration.setThreads(Runtime.getRuntime().availableProcessors() / 2);
+        pmdConfiguration.setMinimumPriority(RulePriority.LOW);
+        pmdConfiguration.setShowSuppressedViolations(false);
+        pmdConfiguration.setAnalysisCacheLocation("cache/violations-" + repository.id + ".cache");
+
         // Find all successfully parsed source files.
         List<SourceFile> successfullyParsedSourceFiles = repository.sourceFiles
                 .stream()
@@ -46,16 +50,12 @@ public class ViolationsParser
             ));
         }
 
-        RuleContext ruleContext = new RuleContext();
-
         for (List<SourceFile> sourceFileBatch : sourceFileBatches)
         {
             List<DataSource> sources = sourceFileBatch
                 .stream()
                 .map(sourceFile -> new FileDataSource(sourceFile.filePath.toFile()))
                 .collect(Collectors.toList());
-
-            InMemoryRenderer inMemoryRenderer = new InMemoryRenderer();
 
             try
             {
@@ -65,6 +65,8 @@ public class ViolationsParser
             {
                 Log.error(e);
             }
+
+            RuleContext ruleContext = new RuleContext();
 
             try
             {

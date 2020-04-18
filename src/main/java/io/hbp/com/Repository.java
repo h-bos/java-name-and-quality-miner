@@ -18,45 +18,54 @@ class Repository
        this.repositoryName = repositoryName;
     }
 
-    public List<List<RecordValue>> identifierRecords()
+    public List<List<Object>> identifierRecords()
     {
-        List<List<RecordValue>> records = sourceFiles.stream().map(SourceFile::asRecords).flatMap(List::stream).collect(Collectors.toList());
-        for (List<RecordValue> record : records)
+        List<List<Object>> records = sourceFiles.stream().map(SourceFile::getIdentifierRecords).flatMap(List::stream).collect(Collectors.toList());
+        for (List<Object> record : records)
         {
-            record.add(new RecordValue("repository_id" , id));
-            record.add(new RecordValue("repository", repositoryName));
-            record.add(new RecordValue("repository_loc" , this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum()));
+            record.add(id);
+            record.add(repositoryName);
+            record.add(this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum());
         }
         return records;
     }
 
-    public List<List<RecordValue>> sourceFileRecords()
+    public List<List<Object>> sourceFileRecords()
     {
-        List<List<RecordValue>> records = new ArrayList<>();
+        List<List<Object>> records = new ArrayList<>();
         for (SourceFile sourceFile : sourceFiles)
         {
             records.add(List.of
             (
-                new RecordValue("repository_id", repositoryID),
-                new RecordValue("repository", repositoryName),
-                new RecordValue("source_file", sourceFile.fileName),
-                new RecordValue("violations", sourceFile.violations.size()),
-                new RecordValue("parsed_successfully", sourceFile.parsedSuccessfully)
+                repositoryID,
+                repositoryName,
+                sourceFile.fileName,
+                sourceFile.violations.size(),
+                sourceFile.parsedSuccessfully,
+                sourceFile.linesOfCode,
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.ENUM).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.ENUM_CONSTANT).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.INTERFACE).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.CLASS).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.FIELD).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.METHOD).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.PARAMETER).count(),
+                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.LOCAL_VARIABLE).count()
             ));
         }
         return records;
     }
 
-    public List<RecordValue> repositoryRecord()
+    public List<Object> repositoryRecord()
     {
         return List.of
         (
-            new RecordValue("repository_id", repositoryID),
-            new RecordValue("repository", repositoryName),
-            new RecordValue("repository_loc", this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum()),
-            new RecordValue("violations", this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum()),
-            new RecordValue("parse_success_amount", this.sourceFiles.stream().filter(x -> x.parsedSuccessfully).count()),
-            new RecordValue("parse_fail_amount", this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count())
+            repositoryID,
+            repositoryName,
+            this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum(),
+            this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum(),
+            this.sourceFiles.stream().filter(x -> x.parsedSuccessfully).count(),
+            this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count()
         );
     }
 }

@@ -13,10 +13,28 @@ import java.util.stream.Collectors;
 
 public class CsvWriter
 {
-    public void appendHeaders(String fileName, List<RecordValue> row)
+    static final List<String> repositoryHeaders = List.of
+    (
+        "repository_id", "repository", "repository_loc", "violations", "parse_success_amount", "parse_fail_amount"
+    );
+
+    static final List<String> sourceFileHeaders = List.of
+    (
+        "repository_id", "repository", "source_file", "violations", "parsed_successfully", "source_file_loc",
+        "enum_amount", "enum_constant_amount", "interface_amount", "class_amount", "field_amount", "method_amount",
+        "parameter_amount", "local_variable_amount"
+    );
+
+    static final List<String> identifierHeaders = List.of
+    (
+        "file", "name", "type", "length", "words", "numbers", "casing_consistency", "source_file_loc", "violations",
+        "parsed_successfully", "repository_id", "repository", "repository_loc"
+    );
+
+    public static void appendHeaders(String fileName, List<String> headers)
     {
         Path filePath = Paths.get(fileName);
-        String headersRow = row.stream().map(recordValue -> recordValue.id).collect(Collectors.joining(","));
+        String headersRow = String.join(",", headers);
         try
         {
             Files.writeString(filePath, headersRow + '\n', StandardOpenOption.APPEND);
@@ -28,13 +46,13 @@ public class CsvWriter
         }
     }
 
-    public void appendRecords(String fileName, List<List<RecordValue>> records)
+    public static void appendRecords(String fileName, List<List<Object>> records)
     {
         Path filePath = Paths.get(fileName);
         List<String> lines = new ArrayList<>();
-        for (List<RecordValue> record : records)
+        for (List<Object> record : records)
         {
-            lines.add(record.stream().map(recordValue -> recordValue.value).collect(Collectors.joining(",")));
+            lines.add(record.stream().map(CsvWriter::toString).collect(Collectors.joining(",")));
         }
         try
         {
@@ -47,7 +65,7 @@ public class CsvWriter
         }
     }
 
-    public void clearFile(String fileName)
+    public static void clearFile(String fileName)
     {
         try
         {
@@ -57,5 +75,14 @@ public class CsvWriter
         {
             Log.error(e);
         }
+    }
+
+    public static String toString(Object value)
+    {
+        if (value instanceof Boolean)
+        {
+            return String.valueOf(value).toUpperCase();
+        }
+        return String.valueOf(value).replace(",", "");
     }
 }

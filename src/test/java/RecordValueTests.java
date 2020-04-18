@@ -1,4 +1,4 @@
-import io.hbp.com.RecordValue;
+import io.hbp.com.CsvWriter;
 import org.junit.Test;
 
 import org.junit.Assert;
@@ -8,13 +8,13 @@ public class RecordValueTests
     @Test
     public void shouldConvertPrimitiveToStringForCscRecords()
     {
-        RecordValue iValue = new RecordValue("id", 0);
-        RecordValue fValue = new RecordValue("id", 0.5f);
-        RecordValue lValue = new RecordValue("id", 1L);
-        RecordValue bValue = new RecordValue("id", false);
-        Assert.assertEquals("0",     iValue.value);
-        Assert.assertEquals("0.5",   fValue.value);
-        Assert.assertEquals("1",     lValue.value);
-        Assert.assertEquals("false", bValue.value);
+        Object iValue = 0;
+        Object fValue = 0.5f;
+        Object lValue = 1L;
+        Object bValue = false;
+        Assert.assertEquals("0",     CsvWriter.toString(iValue));
+        Assert.assertEquals("0.5",   CsvWriter.toString(fValue));
+        Assert.assertEquals("1",     CsvWriter.toString(lValue));
+        Assert.assertEquals("FALSE", CsvWriter.toString(bValue));
     }
 }

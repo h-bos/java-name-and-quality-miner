@@ -13,11 +13,10 @@ public class Main
 
     public static void main(String[] args)
     {
-        CsvWriter csvWriter = new CsvWriter();
-        csvWriter.clearFile(REPOSITORIES_OUTPUT);
-        csvWriter.clearFile(SOURCE_FILES_OUTPUT);
-        csvWriter.clearFile(IDENTIFIERS_OUTPUT);
-        csvWriter.clearFile(LOG_FILE);
+        CsvWriter.clearFile(REPOSITORIES_OUTPUT);
+        CsvWriter.clearFile(SOURCE_FILES_OUTPUT);
+        CsvWriter.clearFile(IDENTIFIERS_OUTPUT);
+        CsvWriter.clearFile(LOG_FILE);
 
         File[] repositoryRootDirectories = new File(REPOSITORIES_FOLDER).listFiles(File::isDirectory);
         assert repositoryRootDirectories != null;
@@ -32,14 +31,14 @@ public class Main
             Repository repository = identifierParser.parseRepository(repositoryRootDirectories[0].toPath());
             violationsParser.parseAndAddViolationsTo(repository);
 
-            csvWriter.appendHeaders(REPOSITORIES_OUTPUT, repository.repositoryRecord());
-            csvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));
+            CsvWriter.appendHeaders(REPOSITORIES_OUTPUT, CsvWriter.repositoryHeaders);
+            CsvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));
 
-            csvWriter.appendHeaders(SOURCE_FILES_OUTPUT, repository.sourceFileRecords().get(0));
-            csvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
+            CsvWriter.appendHeaders(SOURCE_FILES_OUTPUT, CsvWriter.sourceFileHeaders);
+            CsvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
 
-            csvWriter.appendHeaders(IDENTIFIERS_OUTPUT, repository.identifierRecords().get(0));
-            csvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
+            CsvWriter.appendHeaders(IDENTIFIERS_OUTPUT, CsvWriter.identifierHeaders);
+            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
         }
 
         for (int fileIndex = 1; fileIndex < repositoryRootDirectories.length; fileIndex++)
@@ -47,9 +46,9 @@ public class Main
             Log.info("Parsing repository " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
             Repository repository = identifierParser.parseRepository(repositoryRootDirectories[fileIndex].toPath());
             violationsParser.parseAndAddViolationsTo(repository);
-            csvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));
-            csvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
-            csvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
+            CsvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));
+            CsvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
+            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
         }
 
         Log.writeToFile();

@@ -1,28 +1,7 @@
 package io.hbp.com;
 
-import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-
 public class Identifier
 {
-    public enum Type
-    {
-        ENUM("enum"),
-        ENUM_CONSTANT("enum_constant"),
-        INTERFACE("interface"),
-        CLASS("class"),
-        FIELD("field"),
-        METHOD("method"),
-        PARAMETER("parameter"),
-        LOCAL_VARIABLE("variable");
-
-        String value;
-
-        Type(String type)
-        {
-            this.value = type;
-        }
-    }
-
     public enum CasingType
     {
         CAMEL, PASCAL, UNDERLINE, HUNGARIAN, OTHER
@@ -30,17 +9,14 @@ public class Identifier
 
     public String name;
 
-    public Type type;
-
     public float casingConsistency;
 
-    public Identifier(String name, Type type)
+    public Identifier(String name)
     {
         this.name = name;
-        this.type = type;
     }
 
-    public CasingType type()
+    public CasingType casingType()
     {
         // Regexes from:
         //  "How are Identifiers Named in Open Source Software On Popularity and Consistency"

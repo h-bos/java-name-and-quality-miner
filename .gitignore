@@ -137,3 +137,6 @@ identifiers*
 
 # log
 log.txt
+
+# cache
+*.cache

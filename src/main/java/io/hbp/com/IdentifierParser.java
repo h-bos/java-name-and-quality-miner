@@ -85,80 +85,80 @@ public class IdentifierParser
             {
                 if (classOrInterfaceDeclaration.isInterface())
                 {
-                    sourceFile.identifiers.add(new Identifier(classOrInterfaceDeclaration.getNameAsString(), Identifier.Type.INTERFACE));
+                    sourceFile.addIdentifiers(List.of(new Identifier(classOrInterfaceDeclaration.getNameAsString())), IdentifierGroup.EntityType.INTERFACE);
                 }
                 else
                 {
-                    sourceFile.identifiers.add(new Identifier(classOrInterfaceDeclaration.getNameAsString(), Identifier.Type.CLASS));
+                    sourceFile.addIdentifiers(List.of(new Identifier(classOrInterfaceDeclaration.getNameAsString())), IdentifierGroup.EntityType.CLASS);
                 }
             }
 
             // Find enum declarations
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit
                     .findAll(EnumDeclaration.class)
                     .stream()
-                    .map(enumDeclaration -> new Identifier(enumDeclaration.getNameAsString(), Identifier.Type.ENUM))
+                    .map(enumDeclaration -> new Identifier(enumDeclaration.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.ENUM);
 
             // Find enum constant declarations
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit
                     .findAll(EnumConstantDeclaration.class)
                     .stream()
-                    .map(enumDeclaration -> new Identifier(enumDeclaration.getNameAsString(), Identifier.Type.ENUM_CONSTANT))
+                    .map(enumDeclaration -> new Identifier(enumDeclaration.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.ENUM_CONSTANT);
 
             // Find method declarations
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit
                     .findAll(MethodDeclaration.class)
                     .stream()
-                    .map(methodDeclaration -> new Identifier(methodDeclaration.getNameAsString(), Identifier.Type.METHOD))
+                    .map(methodDeclaration -> new Identifier(methodDeclaration.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.METHOD);
 
             // Find field declarations
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit
                     .findAll(FieldDeclaration.class)
                     .stream()
                     .map(FieldDeclaration::getVariables)
                     .flatMap(Collection::stream)
-                    .map(variableDeclaration -> new Identifier(variableDeclaration.getNameAsString(), Identifier.Type.FIELD))
+                    .map(variableDeclaration -> new Identifier(variableDeclaration.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.FIELD);
 
             // Find constructor parameters
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit.findAll(ConstructorDeclaration.class)
                     .stream()
                     .map(CallableDeclaration::getParameters)
                     .flatMap(Collection::stream)
-                    .map(x -> new Identifier(x.getNameAsString(), Identifier.Type.PARAMETER))
+                    .map(x -> new Identifier(x.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.PARAMETER);
 
             // Method parameters
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit.findAll(MethodDeclaration.class)
                     .stream()
                     .map(CallableDeclaration::getParameters)
                     .flatMap(Collection::stream)
-                    .map(x -> new Identifier(x.getNameAsString(), Identifier.Type.PARAMETER))
+                    .map(x -> new Identifier(x.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.PARAMETER);
 
             // Local variables found in method bodies
-            sourceFile.identifiers.addAll
+            sourceFile.addIdentifiers(
             (
                 compilationUnit.findAll(MethodDeclaration.class)
                     .stream()
@@ -167,9 +167,9 @@ public class IdentifierParser
                     .map(Optional::get)
                     .map(x -> x.findAll(VariableDeclarator.class))
                     .flatMap(Collection::stream)
-                    .map(variableDeclaration -> new Identifier(variableDeclaration.getNameAsString(), Identifier.Type.LOCAL_VARIABLE))
+                    .map(variableDeclaration -> new Identifier(variableDeclaration.getNameAsString()))
                     .collect(Collectors.toList())
-            );
+            ), IdentifierGroup.EntityType.LOCAL_VARIABLE);
 
             sourceFile.parsedSuccessfully = true;
             repository.sourceFiles.add(sourceFile);

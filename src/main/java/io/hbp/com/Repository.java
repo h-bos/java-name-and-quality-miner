@@ -20,7 +20,11 @@ class Repository
 
     public List<List<Object>> identifierRecords()
     {
-        List<List<Object>> records = sourceFiles.stream().map(SourceFile::getIdentifierRecords).flatMap(List::stream).collect(Collectors.toList());
+        List<List<Object>> records = sourceFiles
+                .stream()
+                .map(SourceFile::getIdentifierGroupRecords)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
         for (List<Object> record : records)
         {
             record.add(id);
@@ -43,14 +47,14 @@ class Repository
                 sourceFile.violations.size(),
                 sourceFile.parsedSuccessfully,
                 sourceFile.linesOfCode,
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.ENUM).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.ENUM_CONSTANT).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.INTERFACE).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.CLASS).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.FIELD).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.METHOD).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.PARAMETER).count(),
-                sourceFile.identifiers.stream().filter(identifier -> identifier.type == Identifier.Type.LOCAL_VARIABLE).count()
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.ENUM),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.ENUM_CONSTANT),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.INTERFACE),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.CLASS),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.FIELD),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.METHOD),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.PARAMETER),
+                numberOfIdentifiersOf(sourceFile, IdentifierGroup.EntityType.LOCAL_VARIABLE)
             ));
         }
         return records;
@@ -65,7 +69,16 @@ class Repository
             this.sourceFiles.stream().mapToLong(x -> x.linesOfCode).sum(),
             this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum(),
             this.sourceFiles.stream().filter(x -> x.parsedSuccessfully).count(),
-            this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count()
+            this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count(),
         );
+    }
+
+    public int numberOfIdentifiersOf(SourceFile sourceFile, IdentifierGroup.EntityType entityType)
+    {
+        Optional<IdentifierGroup> identifierGroupOptional = sourceFile.identifierGroups
+                .stream()
+                .filter(identifierGroup -> identifierGroup.entityType == entityType)
+                .findAny();
+        return identifierGroupOptional.map(identifierGroup -> identifierGroup.identifiers.size()).orElse(0);
     }
 }

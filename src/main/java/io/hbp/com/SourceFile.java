@@ -47,6 +47,8 @@ public class SourceFile
     {
         List<List<Object>> sourceFileStatistics = new ArrayList<>();
 
+        int totalNumberOfIdentifiers = identifierGroups.stream().mapToInt(group -> group.identifiers.size()).sum();
+
         for (IdentifierGroup identifierGroup : identifierGroups)
         {
             List<Object> identifierRecordValues = new ArrayList<>();
@@ -59,7 +61,7 @@ public class SourceFile
             identifierRecordValues.add(identifierGroup.casingConsistency());
             identifierRecordValues.add(linesOfCode);
             identifierRecordValues.add(violations.size());
-            identifierRecordValues.add(identifierGroups.stream().mapToInt(group -> group.identifiers.size()).sum());
+            identifierRecordValues.add(identifierGroup.identifiers.size() / (float) totalNumberOfIdentifiers * violations.size());
             identifierRecordValues.add(parsedSuccessfully);
             sourceFileStatistics.add(identifierRecordValues);
         }

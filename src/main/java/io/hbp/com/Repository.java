@@ -18,7 +18,7 @@ class Repository
        this.repositoryName = repositoryName;
     }
 
-    public List<List<Object>> identifierRecords()
+    public List<List<Object>> identifierGroupRecords()
     {
         List<List<Object>> records = sourceFiles
                 .stream()
@@ -70,6 +70,7 @@ class Repository
             this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum(),
             this.sourceFiles.stream().filter(x -> x.parsedSuccessfully).count(),
             this.sourceFiles.stream().filter(x -> !x.parsedSuccessfully).count(),
+            this.sourceFiles.stream().mapToInt(x -> x.violations.size()).sum() / (float) this.identifierGroupRecords().size()
         );
     }
 

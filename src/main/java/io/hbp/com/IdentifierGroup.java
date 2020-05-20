@@ -98,6 +98,6 @@ public class IdentifierGroup
 
     public String names()
     {
-        return identifiers.stream().map(identifier -> identifier.name).collect(Collectors.joining("|"));
+        return identifiers.stream().map(identifier -> identifier.name).collect(Collectors.joining(";"));
     }
 }

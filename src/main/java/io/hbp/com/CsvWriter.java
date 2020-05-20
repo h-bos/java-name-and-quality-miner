@@ -27,8 +27,8 @@ public class CsvWriter
 
     static final List<String> identifierHeaders = List.of
     (
-        "file", "names", "type", "avg_length", "avg_words", "avg_numbers", "casing_consistency", "source_file_loc", "violations",
-        "nbr_of_identifiers", "parsed_successfully", "repository_id", "repository", "repository_loc"
+        "file", "names", "type", "avg_length", "avg_words", "avg_numbers", "casing_consistency", "source_file_loc", "violations", "violations_density",
+        "parsed_successfully", "repository_id", "repository", "repository_loc"
     );
 
     public static void appendHeaders(String fileName, List<String> headers)

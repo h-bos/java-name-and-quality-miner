@@ -2,9 +2,6 @@ package io.hbp.com;
 
 import com.github.javaparser.printer.lexicalpreservation.PhantomNodeLogic;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-import com.github.javaparser.symbolsolver.resolution.typeinference.TypeInferenceCache;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.utils.SourceRoot;
 import net.sourceforge.pmd.*;
 import net.sourceforge.pmd.util.datasource.DataSource;
 import net.sourceforge.pmd.util.datasource.FileDataSource;
@@ -49,6 +46,7 @@ public class ViolationsParser
                 successfullyParsedSourceFiles.subList(i * batchSize, Math.min((i + 1) * batchSize, successfullyParsedSourceFiles.size()))
             ));
         }
+
 
         for (List<SourceFile> sourceFileBatch : sourceFileBatches)
         {

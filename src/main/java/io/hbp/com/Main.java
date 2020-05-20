@@ -5,10 +5,10 @@ import java.util.List;
 
 public class Main
 {
-    static final String REPOSITORIES_OUTPUT = "repositories-2.csv";
-    static final String SOURCE_FILES_OUTPUT = "source-files-2.csv";
-    static final String IDENTIFIERS_OUTPUT  = "identifier-groups-2.csv";
-    static final String LOG_FILE            = "log.txt-2";
+    static final String REPOSITORIES_OUTPUT = "repositories.csv";
+    static final String SOURCE_FILES_OUTPUT = "source-files.csv";
+    static final String IDENTIFIERS_OUTPUT  = "identifier-groups.csv";
+    static final String LOG_FILE            = "log.txt";
     static final String REPOSITORIES_FOLDER = "repositories/";
 
     public static void main(String[] args)
@@ -38,7 +38,7 @@ public class Main
             CsvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
 
             CsvWriter.appendHeaders(IDENTIFIERS_OUTPUT, CsvWriter.identifierHeaders);
-            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
+            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierGroupRecords());
         }
 
         for (int fileIndex = 1; fileIndex < repositoryRootDirectories.length; fileIndex++)
@@ -48,7 +48,7 @@ public class Main
             violationsParser.parseAndAddViolationsTo(repository);
             CsvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));
             CsvWriter.appendRecords(SOURCE_FILES_OUTPUT, repository.sourceFileRecords());
-            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierRecords());
+            CsvWriter.appendRecords(IDENTIFIERS_OUTPUT, repository.identifierGroupRecords());
         }
 
         Log.writeToFile();

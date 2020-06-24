@@ -35,10 +35,6 @@
         <exclude name="VariableNamingConventions"></exclude>
     </rule>
     <rule ref="category/java/design.xml">
-        <exclude name="GodClass"></exclude>
-        <exclude name="NcssCount"></exclude>
-        <exclude name="NPathComplexity"></exclude>
-        <exclude name="CyclomaticComplexity"></exclude>
         <exclude name="LoosePackageCoupling"></exclude>
     </rule>
     <rule ref="category/java/documentation.xml"></rule>

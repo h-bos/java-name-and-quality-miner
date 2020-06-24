@@ -43,19 +43,13 @@ public class Identifier
     public int numberOfWords()
     {
         if (name.length() <= 0)
-        {
             return 0;
-        }
 
         if (name.length() <= 1)
-        {
             return 1;
-        }
 
         if (name.length() <= 2)
-        {
             return 2;
-        }
 
         char[] chars = name.toCharArray();
 
@@ -66,17 +60,11 @@ public class Identifier
         {
             ++numberOfWords;
             while ((i + 1) < chars.length - 1 && !hasCasingChanged(chars[i], chars[i + 1]) && !isSplitter(chars[i + 1]))
-            {
                 ++i;
-            }
             if (isSplitter(chars[i + 1]))
-            {
                 i += 2;
-            }
             else
-            {
                 ++i;
-            }
         }
 
         return numberOfWords;

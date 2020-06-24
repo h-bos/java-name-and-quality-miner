@@ -15,20 +15,20 @@ public class CsvWriter
 {
     static final List<String> repositoryHeaders = List.of
     (
-        "repository_id", "repository", "repository_loc", "violations", "parse_success_amount", "parse_fail_amount"
+        "repository", "repository_loc", "violations", "parse_success_amount", "parse_fail_amount"
     );
 
     static final List<String> sourceFileHeaders = List.of
     (
-        "repository_id", "repository", "source_file", "violations", "parsed_successfully", "source_file_loc",
-        "enum_amount", "enum_constant_amount", "interface_amount", "class_amount", "field_amount", "method_amount",
-        "parameter_amount", "local_variable_amount"
+        "repository_id", "repository", "source_file", "violations", "source_file_loc", "avg_length", "avg_words",
+        "avg_digits", "casing_consistency", "usage", "enum_amount", "enum_constant_amount", "interface_amount",
+        "class_amount", "field_amount", "method_amount", "parameter_amount", "local_variable_amount"
     );
 
     static final List<String> identifierHeaders = List.of
     (
-        "file", "names", "type", "avg_length", "avg_words", "avg_numbers", "casing_consistency", "source_file_loc", "violations", "violations_density",
-        "parsed_successfully", "repository_id", "repository", "repository_loc"
+        "file", "names", "type", "avg_length", "avg_words", "avg_numbers", "casing_consistency", "source_file_loc",
+        "violations", "violations_density", "parsed_successfully", "repository_id", "repository", "repository_loc"
     );
 
     public static void appendHeaders(String fileName, List<String> headers)

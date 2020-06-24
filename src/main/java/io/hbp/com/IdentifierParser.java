@@ -93,6 +93,27 @@ public class IdentifierParser
                 }
             }
 
+            // Annotations
+            sourceFile.addIdentifiers(
+            (
+                compilationUnit
+                    .findAll(AnnotationDeclaration.class)
+                    .stream()
+                    .map(annotationDeclaration -> new Identifier(annotationDeclaration.getNameAsString()))
+                    .collect(Collectors.toList())
+            ), IdentifierGroup.EntityType.ANNOTATION);
+
+            // Annotation members
+            sourceFile.addIdentifiers(
+            (
+                compilationUnit
+                    .findAll(AnnotationMemberDeclaration.class)
+                    .stream()
+                    .map(annotationMemberDeclaration -> new Identifier(annotationMemberDeclaration.getNameAsString()))
+                    .collect(Collectors.toList())
+            ), IdentifierGroup.EntityType.ANNOTATION_MEMBER);
+
+
             // Find enum declarations
             sourceFile.addIdentifiers(
             (

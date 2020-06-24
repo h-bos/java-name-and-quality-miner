@@ -27,7 +27,7 @@ public class Main
         int numberOfRepositoriesChecked = 0;
 
         { // Add headers to CSVs based on first project's records headers.
-            Log.info("Parsing repository " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
+            Log.info("Parsing repository " + repositoryRootDirectories[0].getName() + " " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
             Repository repository = identifierParser.parseRepository(repositoryRootDirectories[0].toPath());
             violationsParser.parseAndAddViolationsTo(repository);
 
@@ -43,7 +43,7 @@ public class Main
 
         for (int fileIndex = 1; fileIndex < repositoryRootDirectories.length; fileIndex++)
         {
-            Log.info("Parsing repository " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
+            Log.info("Parsing repository " + repositoryRootDirectories[fileIndex].getName() + " " + ++numberOfRepositoriesChecked + " out of " + repositoryRootDirectories.length);
             Repository repository = identifierParser.parseRepository(repositoryRootDirectories[fileIndex].toPath());
             violationsParser.parseAndAddViolationsTo(repository);
             CsvWriter.appendRecords(REPOSITORIES_OUTPUT, List.of(repository.repositoryRecord()));

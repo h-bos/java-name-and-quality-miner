@@ -17,6 +17,9 @@ public class SourceFile
 
     public boolean parsedSuccessfully = false;
 
+    public static String FIT = "FIT";
+    public static String TEST = "TEST";
+
     public SourceFile(Path filePath)
     {
         this.filePath = filePath;

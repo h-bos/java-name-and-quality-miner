@@ -11,6 +11,8 @@ public class IdentifierGroup
         ENUM("enum"),
         ENUM_CONSTANT("enum_constant"),
         INTERFACE("interface"),
+        ANNOTATION("annotation"),
+        ANNOTATION_MEMBER("annotation_member"),
         CLASS("class"),
         FIELD("field"),
         METHOD("method"),

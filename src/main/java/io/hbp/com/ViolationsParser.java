@@ -17,7 +17,6 @@ public class ViolationsParser
     public void parseAndAddViolationsTo(Repository repository)
     {
         JavaParserFacade.clearInstances();
-        PhantomNodeLogic.cleanUpCache();
 
         PMDConfiguration pmdConfiguration = new PMDConfiguration();
         RuleSetFactory ruleSetFactory = RulesetsFactoryUtils.createFactory(pmdConfiguration);
@@ -27,7 +26,6 @@ public class ViolationsParser
         pmdConfiguration.setThreads(Runtime.getRuntime().availableProcessors() / 2);
         pmdConfiguration.setMinimumPriority(RulePriority.LOW);
         pmdConfiguration.setShowSuppressedViolations(false);
-        pmdConfiguration.setAnalysisCacheLocation("cache/violations-" + repository.id + ".cache");
 
         // Find all successfully parsed source files.
         List<SourceFile> successfullyParsedSourceFiles = repository.sourceFiles

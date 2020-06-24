@@ -22,16 +22,9 @@ mvn package
 
 Place all repositories that you want to analyze in the `repositories` folder.
 
-(Need repository samples? Check out: https://github.com/hb-p/ghtorrent-sampler)
+(Need randomly sampled repositories? Check out: https://github.com/hb-p/ghtorrent-sampler)
 
-#### Generate PMD Report of All Repositories
-
-**Windows**
-```
-pmd.bat -d repositories\ -l java -t {nbrOfThreads} -f csv -R pmd-non-naming-rules.xml -shortnames > pmd-report.csv
-```
-
-#### Generate Report of Identifier Characteristics and Internal Code Quality Attributes
+#### Generate CSV files with identifier/quality measurments 
 ```
 java -jar java-name-and-quality-miner.jar 
 ```
